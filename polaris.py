@@ -20,10 +20,10 @@ class main:
     * ``PIN_VIN`` - analog input for main supply voltage
     * ``PIN_IGNITION`` - digital input for ignition detection (active high)
     * ``PIN_SOS`` - digital input for emergency button (active low)
-    * ``PIN_AIN1`` + ``PIN_RANGE_IN1`` - analog input 1 and range selection pin
-    * ``PIN_AIN2`` + ``PIN_RANGE_IN2`` - analog input 2 and range selection pin
-    * ``PIN_AIN3`` + ``PIN_RANGE_IN3`` - analog input 3 and range selection pin
-    * ``PIN_AIN4`` + ``PIN_RANGE_IN4`` - analog input 4 and range selection pin
+    * ``PIN_AIN1``, ``PIN_RANGE_IN1`` - analog input 1 and range selection pin
+    * ``PIN_AIN2``, ``PIN_RANGE_IN2`` - analog input 2 and range selection pin
+    * ``PIN_AIN3``, ``PIN_RANGE_IN3`` - analog input 3 and range selection pin
+    * ``PIN_AIN4``, ``PIN_RANGE_IN4`` - analog input 4 and range selection pin
     * ``PIN_IOEXP_IN1`` - control input 1 for I/O Expander
     * ``PIN_IOEXP_IN2`` - control input 2 for I/O Expander
     
@@ -32,6 +32,8 @@ class main:
     * ``ADC_IN2`` - ADC channel (using ``PIN_AIN2``)
     * ``ADC_IN3`` - ADC channel (using ``PIN_AIN3``)
     * ``ADC_IN4`` - ADC channel (using ``PIN_AIN4``)
+    * ``PWM_IOEXP_IN1`` - PWM control input 1 for I/O Expander
+    * ``PWM_IOEXP_IN2`` - PWM control input 2 for I/O Expander
     """
     PIN_VIN = D20
 
@@ -57,8 +59,8 @@ class main:
     ADC_IN3 = A7
     ADC_IN4 = A8
 
-    #PWM_OUT1 = PWM8
-    #PWM_OUT2 = PWM24
+    PWM_IOEXP_IN1 = PWM13
+    PWM_IOEXP_IN2 = PWM14
 
 # MikroBus
 class mikrobus:
@@ -216,6 +218,10 @@ class gsm:
 CHARGE_NONE = 0
 CHARGE_BUSY = 1
 CHARGE_COMPLETE = 2
+IGNITION_OFF = 0
+IGNITION_ON = 1
+SOS_OFF = 0
+SOS_ON = 1
 
 # Private globals
 _PIN_NC = -1
@@ -245,6 +251,8 @@ def init():
     pinMode(internal.PIN_5V_EN, OUTPUT)
     digitalWrite(internal.PIN_5V_EN, HIGH)
     pinMode(internal.PIN_CHARGE_STAT, INPUT)
+    pinMode(main.PIN_IGNITION, INPUT)
+    pinMode(main.PIN_SOS, INPUT)
     pinMode(internal.PIN_CHARGE_PROG, OUTPUT)
     digitalWrite(internal.PIN_CHARGE_PROG, HIGH)
     # reboot on power supply input changes
@@ -277,7 +285,7 @@ def getChargerStatus():
     """
 .. function:: getChargerStatus()
 
-    Returns the battery charger status.
+    Returns the battery charger status (not charging, charging or fully charged).
     
     :returns: One of these values: ``CHARGE_NONE`` = 0, ``CHARGE_BUSY`` = 1, ``CHARGE_COMPLETE`` = 2
     """
@@ -290,6 +298,34 @@ def getChargerStatus():
     if res == 3:
         return CHARGE_COMPLETE
     return CHARGE_NONE
+
+def getIgnitionStatus():
+    """
+.. function:: getIgnitionStatus()
+
+    Reads the ignition status from digital input pin IGN/DIO5 (active high).
+    
+    :returns: An integer value to indicate whether the ignition switch is on/off: ``IGNITION_ON`` = 1 or ``IGNITION_OFF`` = 0
+    """
+    pinMode(main.PIN_IGNITION, INPUT_PULLUP)
+    if digitalRead(main.PIN_IGNITION) == LOW:
+        return IGNITION_ON
+    else:
+        return IGNITION_OFF
+
+def getEmergencyStatus():
+    """
+.. function:: getEmergencyStatus()
+
+    Reads the emergency button status from digital input pin SOS/DIO6 (active low).
+    
+    :returns: An integer value to indicate whether the emergency button is switched on/off: ``SOS_ON`` = 1 or ``SOS_OFF`` = 0
+    """
+    pinMode(main.PIN_SOS, INPUT_PULLDOWN)
+    if digitalRead(main.PIN_SOS) == HIGH:
+        return SOS_ON
+    else:
+        return SOS_OFF
 
 def shutdown():
     """
@@ -359,7 +395,7 @@ def readMainVoltage():
     Returns the analog measure of the main supply voltage.
     """
     pinMode(main.PIN_VIN, INPUT_ANALOG)
-    return analogRead(main.ADC_VIN) * _ADC2VOLT
+    return 0.25 + analogRead(main.ADC_VIN) * _ADC2VOLT
 
 def readBattVoltage():
     """
