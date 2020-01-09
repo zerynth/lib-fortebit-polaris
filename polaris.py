@@ -1,12 +1,12 @@
 """
 .. module:: polaris
 
-**************
-Polaris Module
-**************
+*************
+Polaris Board
+*************
 
-This module provides easy access to the Polaris board features, meaningful names
-for MCU pins and peripherals, simplified initialization of on-board devices.
+This module provides easy access to the Polaris board features and meaningful names
+for MCU pins and peripherals.
 
     """
 
@@ -224,7 +224,6 @@ SOS_OFF = 0
 SOS_ON = 1
 
 # Private globals
-_PIN_NC = -1
 _ANALOG_VREF = 2.50
 _ANALOG_SCALE = 13.0154525
 _ANALOG_SCALE_LOW = 2.0
@@ -335,58 +334,6 @@ def shutdown():
     """
     pinMode(internal.PIN_POWER_DIS, OUTPUT)
     digitalWrite(internal.PIN_POWER_DIS, HIGH)
-
-def GSM():
-    """
-.. function:: GSM()
-
-    Initializes the correct Modem library for the Polaris board variant and
-    returns the module object.
-    
-    :returns: ``UG96`` for *Polaris 3G* (*Polaris 2G* and *Polaris NB-IoT* not supported yet)
-    """
-    #-if TARGET == polaris_3g
-    from quectel.ug96 import ug96
-    ug96.init(gsm.SERIAL, _PIN_NC, _PIN_NC, gsm.PIN_POWER, _PIN_NC, gsm.PIN_STATUS, gsm.PIN_KILL, 0)
-    return ug96
-    #-else
-    raise UnsupportedError
-    #-endif
-
-def GNSS():
-    """
-.. function:: GNSS()
-
-    Creates an instance of the correct GNSS receiver class for the Polaris board variant.
-    
-    :returns: ``L76`` for *Polaris 3G* (*Polaris 2G* and *Polaris NB-IoT* not supported yet)
-    """
-    #-if TARGET == polaris_3g
-    from quectel.l76 import l76
-    l = l76.L76(gnss.SERIAL)
-    l.start(gnss.PIN_RESET)
-    return l
-    #-else
-    raise UnsupportedError
-    #-endif
-
-def IO_EXP():
-    """
-.. function:: IO_EXP()
-
-    Creates an instance of the on-board I/O Expander device class (``NCV7240``).
-    """
-    from onsemi.ncv7240 import ncv7240
-    return ncv7240.NCV7240(internal.SPI, internal.PIN_IOEXP_CS)
-
-def ACCEL():
-    """
-.. function:: ACCEL()
-
-    Creates an instance of the on-board accelerometer device class (``LIS2HH12``).
-    """
-    from stm.lis2hh12 import lis2hh12
-    return lis2hh12.LIS2HH12(internal.SPI, internal.PIN_ACCEL_CS)
 
 def readMainVoltage():
     """
