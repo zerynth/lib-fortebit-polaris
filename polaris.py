@@ -143,6 +143,7 @@ class internal:
     * ``PIN_5V_EN`` - control pin for 5V regulator
     * ``PIN_BATT_EN`` - backup battery status pin
     * ``PIN_IOEXP_CS`` - I/O Expander chip-select pin
+    * ``PIN_CAN_STANDBY`` - control pin for CAN transceiver stand-by mode (low for normal operation)
     * ``PIN_ACCEL_CS``, ``PIN_ACCEL_INT`` - accelerometer chip-select and interrupt pins
     * ``PIN_CHARGE_PROG``, ``PIN_CHARGE_STAT`` - backup battery charger control and status pins
     * ``PIN_BATT_ADC`` - analog input for backup battery voltage
@@ -165,6 +166,7 @@ class internal:
     PIN_ACCEL_INT = D61
 
     PIN_IOEXP_CS = D76
+    PIN_CAN_STANDBY = D66
 
     SPI = SPI1
     PWM_CHARGE = PWM9
@@ -249,6 +251,8 @@ def init():
     pinMode(internal.PIN_BATT_EN, INPUT)
     pinMode(internal.PIN_5V_EN, OUTPUT)
     digitalWrite(internal.PIN_5V_EN, HIGH)
+    pinMode(internal.PIN_CAN_STANDBY, OUTPUT)
+    digitalWrite(internal.PIN_CAN_STANDBY, HIGH)
     pinMode(internal.PIN_CHARGE_STAT, INPUT)
     pinMode(main.PIN_IGNITION, INPUT)
     pinMode(main.PIN_SOS, INPUT)
